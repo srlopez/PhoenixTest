@@ -1,4 +1,6 @@
 # App
+Just for fun
+
 
 To start your Phoenix server:
 
