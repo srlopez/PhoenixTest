@@ -3,8 +3,9 @@ Just for fun
 
 To create a user you need to Register (Dont use the new user link)
 To chat, to need to create a Room and go to show page.
-Enjoy
+Enjoy.
 
+There is an interesting job to organize the specific js code for each view.
 
 To start your Phoenix server:
 
