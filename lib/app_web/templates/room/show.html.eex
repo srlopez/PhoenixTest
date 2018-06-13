@@ -134,7 +134,10 @@
 
     channel.join()
       .receive("ok", resp => {
-        console.log("Joined successfully", resp)
+        console.log("Joined successfully! ", resp)
+        resp = eval("(" + resp + ")")
+        console.log(resp.channel)
+
       })
       .receive("error", resp => {
         console.log("Unable to join", resp)

@@ -35,6 +35,7 @@
         </ul>
       </nav>
       <br/>
+      <small><small><%= js_view_name(@view_module, @view_template) %></small></small>
       </header>
 
       <p class="alert alert-info" role="alert"><%= get_flash(@conn, :info) %></p>
