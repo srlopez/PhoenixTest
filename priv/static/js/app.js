@@ -1969,10 +1969,9 @@ var View = function (_MainView) {
   }, {
     key: "unmount",
     value: function unmount() {
-      _get(View.prototype.__proto__ || Object.getPrototypeOf(View.prototype), "unmount", this).call(this);
-
       // Specific logic here
       console.log('room-show unmounted');
+      _get(View.prototype.__proto__ || Object.getPrototypeOf(View.prototype), "unmount", this).call(this);
     }
   }]);
 
