@@ -18,11 +18,23 @@ import "phoenix_html"
 // Local files can be imported directly using relative
 // paths "./socket" or full ones "web/static/js/socket".
 
-import { Presence, socket } from "./socket"
+// import { Presence, socket } from "./socket"
 
-window.getPhoenixSocket = function() {
-    return socket;
-};
-window.getPhoenixPresence = function() {
-    return Presence;
-};
+import loadView from './views/view_loader';
+
+function handleDOMContentLoaded() {
+  //// Get the current view name
+  const viewName = document.getElementsByTagName('body')[0].dataset.jsViewName;
+  // Load view class and mount it
+  const ViewClass = loadView(viewName);
+
+  window.currentView = new ViewClass();
+  window.currentView.mount();
+}
+
+function handleDocumentUnload() {
+  window.currentView.unmount();
+}
+
+window.addEventListener('DOMContentLoaded', handleDOMContentLoaded, false);
+window.addEventListener('unload', handleDocumentUnload, false);

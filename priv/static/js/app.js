@@ -1640,11 +1640,15 @@ require.register("phoenix_html/priv/static/phoenix_html.js", function(exports, r
   })();
 });
 require.register("js/app.js", function(exports, require, module) {
-"use strict";
+'use strict';
 
-require("phoenix_html");
+require('phoenix_html');
 
-var _socket = require("./socket");
+var _view_loader = require('./views/view_loader');
+
+var _view_loader2 = _interopRequireDefault(_view_loader);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 // Brunch automatically concatenates all files in your
 // watched paths. Those paths can be configured at
@@ -1659,18 +1663,29 @@ var _socket = require("./socket");
 //
 // If you no longer want to use a dependency, remember
 // to also remove its path from "config.paths.watched".
-window.getPhoenixSocket = function () {
-    return _socket.socket;
-};
+function handleDOMContentLoaded() {
+  //// Get the current view name
+  var viewName = document.getElementsByTagName('body')[0].dataset.jsViewName;
+  // Load view class and mount it
+  var ViewClass = (0, _view_loader2.default)(viewName);
+
+  window.currentView = new ViewClass();
+  window.currentView.mount();
+}
 
 // Import local files
 //
 // Local files can be imported directly using relative
 // paths "./socket" or full ones "web/static/js/socket".
 
-window.getPhoenixPresence = function () {
-    return _socket.Presence;
-};
+// import { Presence, socket } from "./socket"
+
+function handleDocumentUnload() {
+  window.currentView.unmount();
+}
+
+window.addEventListener('DOMContentLoaded', handleDOMContentLoaded, false);
+window.addEventListener('unload', handleDocumentUnload, false);
 
 });
 
@@ -1748,6 +1763,287 @@ exports.Presence = _phoenix.Presence;
 exports.socket = socket;
 
 // export default socket
+
+});
+
+;require.register("js/views/main.js", function(exports, require, module) {
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+// assets/js/views/main.js
+
+var MainView = function () {
+  function MainView() {
+    _classCallCheck(this, MainView);
+  }
+
+  _createClass(MainView, [{
+    key: 'mount',
+    value: function mount() {
+      // This will be executed when the document loads...
+      console.log('MainView mounted');
+    }
+  }, {
+    key: 'unmount',
+    value: function unmount() {
+      // This will be executed when the document unloads...
+      console.log('MainView unmounted');
+    }
+  }]);
+
+  return MainView;
+}();
+
+exports.default = MainView;
+
+});
+
+require.register("js/views/room_show.js", function(exports, require, module) {
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _get = function get(object, property, receiver) { if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
+
+var _main = require('./main');
+
+var _main2 = _interopRequireDefault(_main);
+
+var _socket = require('../socket');
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _toArray(arr) { return Array.isArray(arr) ? arr : Array.from(arr); }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var View = function (_MainView) {
+  _inherits(View, _MainView);
+
+  function View() {
+    _classCallCheck(this, View);
+
+    return _possibleConstructorReturn(this, (View.__proto__ || Object.getPrototypeOf(View)).apply(this, arguments));
+  }
+
+  _createClass(View, [{
+    key: 'mount',
+    value: function mount() {
+      _get(View.prototype.__proto__ || Object.getPrototypeOf(View.prototype), 'mount', this).call(this);
+
+      // Specific logic here
+      console.log('room-show mounted');
+      console.log('eex room.id: ' + eex["@room.id"]);
+
+      var channel = _socket.socket.channel("room:" + eex["@room.id"], {});
+
+      var presences = {};
+      var messageInput = document.querySelector("#message-content");
+      var messagesContainer = document.querySelector("#messages");
+      var onlineUsers = document.querySelector("#online-users");
+
+      var typingTimeout = 2000;
+      var typingTimer;
+      var userTyping = false;
+
+      channel.join().receive("ok", function (resp) {
+        console.log("Joined successfully! ", resp);
+        resp = eval("(" + resp + ")");
+        console.log(resp.channel);
+      }).receive("error", function (resp) {
+        console.log("Unable to join", resp);
+      });
+
+      messageInput.addEventListener("keypress", function (event) {
+        if (event.keyCode === 13) {
+          setUserTyping(false);
+          channel.push("message:add", {
+            body: messageInput.value,
+            name: eex["@current_user.name"],
+            user_id: eex["@current_user.id"],
+            room_id: eex["@room.id"]
+          });
+          messageInput.value = "";
+        }
+      });
+
+      channel.on("message:new", function (payload) {
+        var messageItem = document.createElement("li");
+        //messageItem.innerText = `${payload.name} [${Date()}] ${payload.body}`
+        messageItem.innerHTML = '<b>' + payload.name + '</b>\n      <br>\n      <small><small><em>' + Date() + '</em>:</small></small>\n        ' + payload.body;
+        messagesContainer.insertBefore(messageItem, messagesContainer.childNodes[0]);
+      });
+
+      channel.on("presence_state", function (state) {
+        presences = _socket.Presence.syncState(presences, state);
+        renderOnlineUsers(presences);
+      });
+
+      channel.on("presence_diff", function (diff) {
+        presences = _socket.Presence.syncDiff(presences, diff);
+        renderOnlineUsers(presences);
+      });
+
+      var renderOnlineUsers = function renderOnlineUsers(presences) {
+        var onlineUsersMarkup = _socket.Presence.list(presences, function (_id, _ref) {
+          var _ref$metas = _toArray(_ref.metas),
+              user = _ref$metas[0],
+              rest = _ref$metas.slice(1);
+
+          var typingIndicator = '';
+          //console.dir (user.typing)
+          if (user.typing) {
+            typingIndicator = ' <i>(typing...)</i>';
+          }
+          return '\n          <div id="online-user-' + user.user_id + '">\n            <strong class="text-secondary">' + user.name + '</strong> ' + typingIndicator + '\n          </div>';
+        }).join("");
+
+        onlineUsers.innerHTML = onlineUsersMarkup;
+      };
+
+      messageInput.addEventListener("keydown", function (event) {
+        setUserTyping(true);
+        clearTimeout(typingTimer);
+      });
+
+      messageInput.addEventListener("keyup", function (event) {
+        // Cada vez que levanta tecla es que teclea, reestablecemos el timer
+        clearTimeout(typingTimer);
+        typingTimer = setTimeout(setUserTyping(false), typingTimeout);
+      });
+
+      var setUserTyping = function setUserTyping(status) {
+        if (userTyping == status) {
+          return;
+        }
+        userTyping = status;
+
+        channel.push('user:typing', {
+          typing: status,
+          name: eex["@current_user.name"]
+        });
+      };
+    }
+  }, {
+    key: 'unmount',
+    value: function unmount() {
+      _get(View.prototype.__proto__ || Object.getPrototypeOf(View.prototype), 'unmount', this).call(this);
+
+      // Specific logic here
+      console.log('room-show unmounted');
+    }
+  }]);
+
+  return View;
+}(_main2.default);
+
+exports.default = View;
+
+});
+
+require.register("js/views/user_show.js", function(exports, require, module) {
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _get = function get(object, property, receiver) { if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
+
+var _main = require('./main');
+
+var _main2 = _interopRequireDefault(_main);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var View = function (_MainView) {
+  _inherits(View, _MainView);
+
+  function View() {
+    _classCallCheck(this, View);
+
+    return _possibleConstructorReturn(this, (View.__proto__ || Object.getPrototypeOf(View)).apply(this, arguments));
+  }
+
+  _createClass(View, [{
+    key: 'mount',
+    value: function mount() {
+      _get(View.prototype.__proto__ || Object.getPrototypeOf(View.prototype), 'mount', this).call(this);
+
+      // Specific logic here
+      console.log('user-show mounted');
+    }
+  }, {
+    key: 'unmount',
+    value: function unmount() {
+      _get(View.prototype.__proto__ || Object.getPrototypeOf(View.prototype), 'unmount', this).call(this);
+
+      // Specific logic here
+      console.log('user-show unmounted');
+    }
+  }]);
+
+  return View;
+}(_main2.default);
+
+exports.default = View;
+
+});
+
+require.register("js/views/view_loader.js", function(exports, require, module) {
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = loadView;
+
+var _main = require('./main');
+
+var _main2 = _interopRequireDefault(_main);
+
+var _room_show = require('./room_show');
+
+var _room_show2 = _interopRequireDefault(_room_show);
+
+var _user_show = require('./user_show');
+
+var _user_show2 = _interopRequireDefault(_user_show);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+// Collection of specific view modules
+var views = {
+  "room_show": _room_show2.default,
+  "user_show": _user_show2.default
+};
+
+function loadView(viewName) {
+  return views[viewName] || _main2.default;
+}
 
 });
 

@@ -3,6 +3,8 @@ defmodule AppWeb.RoomChannel do
   alias AppWeb.Presence
 
   def join("room:" <> room_id, payload, socket) do
+    IO.puts("room:" <> room_id)
+
     if authorized?(payload) do
       send(self(), :after_join)
       # {:ok, socket}
@@ -17,8 +19,8 @@ defmodule AppWeb.RoomChannel do
 
     # filter:Evitamos enviar otra 'presencia' que no sea la de usuarios
     # Creo que es necesario en caso de que se 'trackeen' otros 'resources'
-    users = Enum.filter(Presence.list(socket), &Regex.match?(~r/^user:/, elem(&1, 0)))
-    push(socket, "presence_state", users)
+    _users = Enum.filter(Presence.list(socket), &Regex.match?(~r/^user:/, elem(&1, 0)))
+    push(socket, "presence_state", Presence.list(socket))
 
     {:ok, _} =
       Presence.track(socket, "user:#{user.id}", %{
