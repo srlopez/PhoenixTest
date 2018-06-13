@@ -33,6 +33,8 @@ export default class View extends MainView {
         console.log("Unable to join", resp)
       })
 
+    channel.onClose(e => console.log("channel closed",e))
+
     messageInput.addEventListener("keypress", event => {
       if (event.keyCode === 13) {
         setUserTyping(false);

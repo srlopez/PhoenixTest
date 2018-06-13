@@ -1896,6 +1896,10 @@ var View = function (_MainView) {
         console.log("Unable to join", resp);
       });
 
+      channel.onClose(function (e) {
+        return console.log("channel closed", e);
+      });
+
       messageInput.addEventListener("keypress", function (event) {
         if (event.keyCode === 13) {
           setUserTyping(false);
