@@ -1678,7 +1678,7 @@ function handleDOMContentLoaded() {
 // Local files can be imported directly using relative
 // paths "./socket" or full ones "web/static/js/socket".
 
-// import { Presence, socket } from "./socket"
+// import socket from "./socket"
 
 function handleDocumentUnload() {
   window.currentView.unmount();
@@ -1695,7 +1695,6 @@ require.register("js/socket.js", function(exports, require, module) {
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.socket = exports.Presence = undefined;
 
 var _phoenix = require("phoenix");
 
@@ -1759,14 +1758,11 @@ socket.connect();
 //   .receive("ok", resp => { console.log("Joined successfully", resp) })
 //   .receive("error", resp => { console.log("Unable to join", resp) })
 
-exports.Presence = _phoenix.Presence;
-exports.socket = socket;
-
-// export default socket
+exports.default = socket;
 
 });
 
-;require.register("js/views/main.js", function(exports, require, module) {
+require.register("js/views/main.js", function(exports, require, module) {
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -1806,7 +1802,7 @@ exports.default = MainView;
 });
 
 require.register("js/views/room_show.js", function(exports, require, module) {
-'use strict';
+"use strict";
 
 Object.defineProperty(exports, "__esModule", {
   value: true
@@ -1816,11 +1812,15 @@ var _createClass = function () { function defineProperties(target, props) { for 
 
 var _get = function get(object, property, receiver) { if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
 
-var _main = require('./main');
+var _main = require("./main");
 
 var _main2 = _interopRequireDefault(_main);
 
-var _socket = require('../socket');
+var _socket = require("../socket");
+
+var _socket2 = _interopRequireDefault(_socket);
+
+var _phoenix = require("phoenix");
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -1842,15 +1842,15 @@ var View = function (_MainView) {
   }
 
   _createClass(View, [{
-    key: 'mount',
+    key: "mount",
     value: function mount() {
-      _get(View.prototype.__proto__ || Object.getPrototypeOf(View.prototype), 'mount', this).call(this);
+      _get(View.prototype.__proto__ || Object.getPrototypeOf(View.prototype), "mount", this).call(this);
 
       // Specific logic here
       console.log('room-show mounted');
       console.log('eex room.id: ' + eex["@room.id"]);
 
-      var channel = _socket.socket.channel("room:" + eex["@room.id"], {});
+      var channel = _socket2.default.channel("room:" + eex["@room.id"], {});
 
       var presences = {};
       var messageInput = document.querySelector("#message-content");
@@ -1885,22 +1885,22 @@ var View = function (_MainView) {
       channel.on("message:new", function (payload) {
         var messageItem = document.createElement("li");
         //messageItem.innerText = `${payload.name} [${Date()}] ${payload.body}`
-        messageItem.innerHTML = '<b>' + payload.name + '</b>\n      <br>\n      <small><small><em>' + Date() + '</em>:</small></small>\n        ' + payload.body;
+        messageItem.innerHTML = "<b>" + payload.name + "</b>\n      <br>\n      <small><small><em>" + Date() + "</em>:</small></small>\n        " + payload.body;
         messagesContainer.insertBefore(messageItem, messagesContainer.childNodes[0]);
       });
 
       channel.on("presence_state", function (state) {
-        presences = _socket.Presence.syncState(presences, state);
+        presences = _phoenix.Presence.syncState(presences, state);
         renderOnlineUsers(presences);
       });
 
       channel.on("presence_diff", function (diff) {
-        presences = _socket.Presence.syncDiff(presences, diff);
+        presences = _phoenix.Presence.syncDiff(presences, diff);
         renderOnlineUsers(presences);
       });
 
       var renderOnlineUsers = function renderOnlineUsers(presences) {
-        var onlineUsersMarkup = _socket.Presence.list(presences, function (_id, _ref) {
+        var onlineUsersMarkup = _phoenix.Presence.list(presences, function (_id, _ref) {
           var _ref$metas = _toArray(_ref.metas),
               user = _ref$metas[0],
               rest = _ref$metas.slice(1);
@@ -1910,7 +1910,7 @@ var View = function (_MainView) {
           if (user.typing) {
             typingIndicator = ' <i>(typing...)</i>';
           }
-          return '\n          <div id="online-user-' + user.user_id + '">\n            <strong class="text-secondary">' + user.name + '</strong> ' + typingIndicator + '\n          </div>';
+          return "\n          <div id=\"online-user-" + user.user_id + "\">\n            <strong class=\"text-secondary\">" + user.name + "</strong> " + typingIndicator + "\n          </div>";
         }).join("");
 
         onlineUsers.innerHTML = onlineUsersMarkup;
@@ -1940,9 +1940,9 @@ var View = function (_MainView) {
       };
     }
   }, {
-    key: 'unmount',
+    key: "unmount",
     value: function unmount() {
-      _get(View.prototype.__proto__ || Object.getPrototypeOf(View.prototype), 'unmount', this).call(this);
+      _get(View.prototype.__proto__ || Object.getPrototypeOf(View.prototype), "unmount", this).call(this);
 
       // Specific logic here
       console.log('room-show unmounted');

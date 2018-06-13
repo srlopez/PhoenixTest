@@ -1,5 +1,6 @@
 import MainView from './main';
-import { Presence, socket } from "../socket"
+import socket from "../socket";
+import {Presence} from "phoenix";
 
 export default class View extends MainView {
   mount() {

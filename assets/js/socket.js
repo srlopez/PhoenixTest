@@ -3,7 +3,7 @@
 
 // To use Phoenix channels, the first step is to import Socket
 // and connect at the socket path in "lib/web/endpoint.ex":
-import {Socket, Presence} from "phoenix"
+import {Socket} from "phoenix"
 
 let socket = new Socket("/socket", {params: {token: window.userToken}})
 
@@ -60,9 +60,4 @@ socket.connect()
 //   .receive("ok", resp => { console.log("Joined successfully", resp) })
 //   .receive("error", resp => { console.log("Unable to join", resp) })
 
-export {
-  Presence,
-  socket
-}
-
-// export default socket
+export default socket
