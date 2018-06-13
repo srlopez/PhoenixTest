@@ -12,6 +12,7 @@
                         'Elixir.App.Auth.SessionManager','Elixir.App.Chat',
                         'Elixir.App.Chat.Message','Elixir.App.Chat.Room',
                         'Elixir.App.Repo','Elixir.AppWeb',
+                        'Elixir.AppWeb.AppChannel',
                         'Elixir.AppWeb.Auth.AuthenticateUserPlug',
                         'Elixir.AppWeb.Auth.ContactController',
                         'Elixir.AppWeb.Auth.ContactView',

@@ -6,6 +6,7 @@ To chat, to need to create a Room and go to show page.
 Enjoy.
 
 There is an interesting job to organize the specific js code for each view.
+Also there are local (just in a template) channel for chat, and a global channel for .. what ever you want from any template.
 
 To start your Phoenix server:
 

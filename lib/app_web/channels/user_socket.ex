@@ -2,7 +2,8 @@ defmodule AppWeb.UserSocket do
   use Phoenix.Socket
 
   ## Channels
-  channel "room:*", AppWeb.RoomChannel
+  channel("room:*", AppWeb.RoomChannel)
+  channel("app:*", AppWeb.AppChannel)
 
   ## Transports
   transport(:websocket, Phoenix.Transports.WebSocket)
@@ -19,15 +20,17 @@ defmodule AppWeb.UserSocket do
   #
   # See `Phoenix.Token` documentation for examples in
   # performing token verification on connect.
-  @max_age 60 * 60 * 24 * 14 # 1209600 is equivalent to two weeks in seconds
+  # 1209600 is equivalent to two weeks in seconds
+  @max_age 60 * 60 * 24 * 14
   def connect(%{"token" => token} = _payload, socket) do
     # IO.inspect payload
     case Phoenix.Token.verify(socket, "user token", token, max_age: @max_age) do
-     {:ok, user_id} ->
-       {:ok, assign(socket, :current_user_id, user_id)}
-     {:error, _reason} ->
-       :error
-     end
+      {:ok, user_id} ->
+        {:ok, assign(socket, :current_user_id, user_id)}
+
+      {:error, _reason} ->
+        :error
+    end
   end
 
   def connect(_params, _socket), do: :error

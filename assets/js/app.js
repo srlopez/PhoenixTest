@@ -18,8 +18,7 @@ import "phoenix_html"
 // Local files can be imported directly using relative
 // paths "./socket" or full ones "web/static/js/socket".
 
-// import socket from "./socket"
-
+import socket from "./socket"
 import loadView from './views/view_loader';
 
 function handleDOMContentLoaded() {
@@ -38,3 +37,19 @@ function handleDocumentUnload() {
 
 window.addEventListener('DOMContentLoaded', handleDOMContentLoaded, false);
 window.addEventListener('unload', handleDocumentUnload, false);
+
+
+let channel = socket.channel("app:view", "Hello World!")
+channel.join()
+  .receive("ok", resp => {
+    //console.log("Joined successfully!", resp)
+  })
+  .receive("error", resp => {
+    console.log("Unable to join", resp)
+  })
+
+channel.on("enter_view", payload => {
+  console.log(payload);
+})
+
+export default channel

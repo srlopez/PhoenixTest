@@ -1640,17 +1640,38 @@ require.register("phoenix_html/priv/static/phoenix_html.js", function(exports, r
   })();
 });
 require.register("js/app.js", function(exports, require, module) {
-'use strict';
+"use strict";
 
-require('phoenix_html');
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
 
-var _view_loader = require('./views/view_loader');
+require("phoenix_html");
+
+var _socket = require("./socket");
+
+var _socket2 = _interopRequireDefault(_socket);
+
+var _view_loader = require("./views/view_loader");
 
 var _view_loader2 = _interopRequireDefault(_view_loader);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-// Brunch automatically concatenates all files in your
+// Import local files
+//
+// Local files can be imported directly using relative
+// paths "./socket" or full ones "web/static/js/socket".
+
+function handleDOMContentLoaded() {
+  //// Get the current view name
+  var viewName = document.getElementsByTagName('body')[0].dataset.jsViewName;
+  // Load view class and mount it
+  var ViewClass = (0, _view_loader2.default)(viewName);
+
+  window.currentView = new ViewClass();
+  window.currentView.mount();
+} // Brunch automatically concatenates all files in your
 // watched paths. Those paths can be configured at
 // config.paths.watched in "brunch-config.js".
 //
@@ -1663,22 +1684,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 //
 // If you no longer want to use a dependency, remember
 // to also remove its path from "config.paths.watched".
-function handleDOMContentLoaded() {
-  //// Get the current view name
-  var viewName = document.getElementsByTagName('body')[0].dataset.jsViewName;
-  // Load view class and mount it
-  var ViewClass = (0, _view_loader2.default)(viewName);
 
-  window.currentView = new ViewClass();
-  window.currentView.mount();
-}
-
-// Import local files
-//
-// Local files can be imported directly using relative
-// paths "./socket" or full ones "web/static/js/socket".
-
-// import socket from "./socket"
 
 function handleDocumentUnload() {
   window.currentView.unmount();
@@ -1686,6 +1692,19 @@ function handleDocumentUnload() {
 
 window.addEventListener('DOMContentLoaded', handleDOMContentLoaded, false);
 window.addEventListener('unload', handleDocumentUnload, false);
+
+var channel = _socket2.default.channel("app:view", "Hello World!");
+channel.join().receive("ok", function (resp) {
+  //console.log("Joined successfully!", resp)
+}).receive("error", function (resp) {
+  console.log("Unable to join", resp);
+});
+
+channel.on("enter_view", function (payload) {
+  console.log(payload);
+});
+
+exports.default = channel;
 
 });
 
@@ -1763,17 +1782,24 @@ exports.default = socket;
 });
 
 require.register("js/views/main.js", function(exports, require, module) {
-'use strict';
+"use strict";
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }(); // assets/js/views/main.js
+
+
+var _app = require("../app");
+
+var _app2 = _interopRequireDefault(_app);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-// assets/js/views/main.js
+//Global channel
 
 var MainView = function () {
   function MainView() {
@@ -1781,13 +1807,14 @@ var MainView = function () {
   }
 
   _createClass(MainView, [{
-    key: 'mount',
+    key: "mount",
     value: function mount() {
       // This will be executed when the document loads...
       console.log('MainView mounted');
+      _app2.default.push("enter_view", { view: document.getElementsByTagName('body')[0].dataset.jsViewName });
     }
   }, {
-    key: 'unmount',
+    key: "unmount",
     value: function unmount() {
       // This will be executed when the document unloads...
       console.log('MainView unmounted');
