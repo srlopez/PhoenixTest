@@ -1693,15 +1693,17 @@ function handleDocumentUnload() {
 window.addEventListener('DOMContentLoaded', handleDOMContentLoaded, false);
 window.addEventListener('unload', handleDocumentUnload, false);
 
-var channel = _socket2.default.channel("app:view", "Hello World!");
+var channel = _socket2.default.channel("app:test", "Hello World!");
 channel.join().receive("ok", function (resp) {
-  //console.log("Joined successfully!", resp)
+  console.log("Joined successfully!", resp);
+  resp = eval("(" + resp + ")");
+  //console.log(resp.channel)
 }).receive("error", function (resp) {
   console.log("Unable to join", resp);
 });
 
 channel.on("enter_view", function (payload) {
-  console.log(payload);
+  console.log("enter_view: ", payload.view);
 });
 
 exports.default = channel;
@@ -1811,7 +1813,10 @@ var MainView = function () {
     value: function mount() {
       // This will be executed when the document loads...
       console.log('MainView mounted');
+
+      // Test a simple event
       _app2.default.push("enter_view", { view: document.getElementsByTagName('body')[0].dataset.jsViewName });
+      //console.log("gchannel:", gchannel.state, " ", gchannel.topic)
     }
   }, {
     key: "unmount",
@@ -1889,9 +1894,9 @@ var View = function (_MainView) {
       var userTyping = false;
 
       channel.join().receive("ok", function (resp) {
-        console.log("Joined successfully! ", resp);
+        console.log("Joined successfully!", resp);
         resp = eval("(" + resp + ")");
-        console.log(resp.channel);
+        //console.log(resp.channel)
       }).receive("error", function (resp) {
         console.log("Unable to join", resp);
       });

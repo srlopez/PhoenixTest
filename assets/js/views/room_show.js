@@ -24,9 +24,9 @@ export default class View extends MainView {
 
     channel.join()
       .receive("ok", resp => {
-        console.log("Joined successfully! ", resp)
+        console.log("Joined successfully!", resp)
         resp = eval("(" + resp + ")")
-        console.log(resp.channel)
+        //console.log(resp.channel)
 
       })
       .receive("error", resp => {

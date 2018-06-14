@@ -39,17 +39,19 @@ window.addEventListener('DOMContentLoaded', handleDOMContentLoaded, false);
 window.addEventListener('unload', handleDocumentUnload, false);
 
 
-let channel = socket.channel("app:view", "Hello World!")
+let channel = socket.channel("app:test", "Hello World!")
 channel.join()
   .receive("ok", resp => {
-    //console.log("Joined successfully!", resp)
+    console.log("Joined successfully!", resp)
+    resp = eval("(" + resp + ")")
+    //console.log(resp.channel)
   })
   .receive("error", resp => {
     console.log("Unable to join", resp)
   })
 
 channel.on("enter_view", payload => {
-  console.log(payload);
+  console.log("enter_view: ",payload.view);
 })
 
 export default channel
