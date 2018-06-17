@@ -6,9 +6,8 @@ defmodule App.Accounts.User do
     field(:name, :string, null: false)
     field(:surname, :string)
 
-    has_one :credential, App.Accounts.Credential
-    has_many :messages, App.Chat.Message
-
+    has_one(:credential, App.Accounts.Credential)
+    has_many(:messages, App.Chat.Message)
 
     timestamps()
   end

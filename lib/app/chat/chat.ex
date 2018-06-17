@@ -37,10 +37,9 @@ defmodule App.Chat do
 
   """
   def get_room!(id) do
-     Room
-     |> Repo.get!(id)
-     |> App.Repo.preload([messages: (from m in Message, order_by: [desc: m.id])])
-
+    Room
+    |> Repo.get!(id)
+    |> App.Repo.preload(messages: from(m in Message, order_by: [desc: m.id]))
   end
 
   @doc """
@@ -108,12 +107,9 @@ defmodule App.Chat do
     Room.changeset(room, %{})
   end
 
-
   def create_message(attrs \\ %{}) do
     %Message{}
     |> Message.changeset(attrs)
     |> Repo.insert()
   end
-
-
 end

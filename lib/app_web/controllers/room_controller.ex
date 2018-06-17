@@ -20,6 +20,7 @@ defmodule AppWeb.RoomController do
         conn
         |> put_flash(:info, "Room created successfully.")
         |> redirect(to: room_path(conn, :show, room))
+
       {:error, %Ecto.Changeset{} = changeset} ->
         render(conn, "new.html", changeset: changeset)
     end
@@ -44,6 +45,7 @@ defmodule AppWeb.RoomController do
         conn
         |> put_flash(:info, "Room updated successfully.")
         |> redirect(to: room_path(conn, :show, room))
+
       {:error, %Ecto.Changeset{} = changeset} ->
         render(conn, "edit.html", room: room, changeset: changeset)
     end

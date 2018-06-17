@@ -2,10 +2,9 @@ defmodule App.Chat.Message do
   use Ecto.Schema
   import Ecto.Changeset
 
-
   schema "messages" do
-    field :body, :string
-    field :name, :string
+    field(:body, :string)
+    field(:name, :string)
     # field :user_id, :id
     # field :room_id, :id
 

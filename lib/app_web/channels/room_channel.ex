@@ -17,11 +17,6 @@ defmodule AppWeb.RoomChannel do
   def handle_info(:after_join, socket) do
     user = App.Accounts.get_user!(socket.assigns.current_user_id)
 
-    # filter:Evitamos enviar otra 'presencia' que no sea la de usuarios
-    # Creo que es necesario en caso de que se 'trackeen' otros 'resources'
-    _users = Enum.filter(Presence.list(socket), &Regex.match?(~r/^user:/, elem(&1, 0)))
-    push(socket, "presence_state", Presence.list(socket))
-
     {:ok, _} =
       Presence.track(socket, "user:#{user.id}", %{
         typing: false,
@@ -29,6 +24,11 @@ defmodule AppWeb.RoomChannel do
         name: user.name
         # online_at: inspect(System.system_time(:seconds))
       })
+
+    # filter:Evitamos enviar otra 'presencia' que no sea la de usuarios
+    # Creo que es necesario en caso de que se 'trackeen' otros 'resources'
+    # users = Enum.filter(Presence.list(socket), &Regex.match?(~r/^user:/, elem(&1, 0)))
+    push(socket, "presence_state", Presence.list(socket))
 
     {:noreply, socket}
   end
